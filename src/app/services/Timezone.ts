@@ -1,4 +1,3 @@
-//const ct = require("countries-and-timezones");
 import * as lib from 'countries-and-timezones';
 import * as moment from 'moment-timezone'
 
@@ -15,11 +14,8 @@ export class Timezone {
     }
 
     calculeTimezone(timezone: string, hourDate: string) {
-        const hour = parseInt(hourDate.split(":")[0]);
-        const minutes = parseInt(hourDate.split(":")[1]);
-        const date = new Date();
-        date.setHours(hour, minutes);
-        const result = moment.utc(date.getTime()).tz(timezone).format("HH:mm");
+        const resultDate = moment.utc(`2020-06-11 ${hourDate}`).tz("Europe/London");
+        const result = resultDate.tz(timezone).format("HH:mm");
         return result;
     }
 }

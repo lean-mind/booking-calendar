@@ -3,7 +3,7 @@ import { lang as langDays } from '../lang/days';
 import { Day } from '../interfaces/Day';
 import { Language } from '../pipes/Language';
 import { ApiCalendar } from '../services/ApiCalendar';
-import { stringify } from 'node:querystring';
+import { Timezone as TimezoneService } from "../services/Timezone";
 
 export class Calendar {
 
@@ -30,9 +30,14 @@ export class Calendar {
     daysName: string[] = [];
 
     /**
-     * 
+     * Busy hours of the day
      */
     busyHours: string[] = [];
+
+    /**
+     * Timezone Object
+     */
+    _timezone: TimezoneService;
 
     /**
      * @param key {string} Google Calendar API KEY
@@ -41,6 +46,7 @@ export class Calendar {
         this.lang = lang;
         this.monthsName = langMonths[lang] as string[];
         this.daysName = langDays[lang] as string[];
+        this._timezone = new TimezoneService();
         let today = new Date();
         this.currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
         this.api = new ApiCalendar();
@@ -212,14 +218,14 @@ export class Calendar {
      * Call the api and get the busy hour of the calendar
      * @param day {string} Day of wich we are going to get the hours
      */
-    setDay(day: string): Promise<boolean> {
+    setDay(day: string, timezone: string): Promise<boolean> {
         const date: Date = new Date(this.currentDate.getFullYear(),
             this.currentDate.getMonth(),
             parseInt(day), 1)
         return new Promise((resolve, reject) => {
             this.api.get(date)
             .then((data) => {
-                this.setBusyHours(data);
+                this.setBusyHours(data, timezone);
                 resolve(true);
             }).catch((error) => {
                 reject(true);
@@ -231,13 +237,14 @@ export class Calendar {
      * Set the busy hours 
      * @param json 
      */
-    setBusyHours(json: any[]): void {
+    setBusyHours(json: any[], timezone: string): void {
         const busyHours: string[] = [];
         json.forEach((item) => {
             let hourT = item.start.dateTime.split("T")[1].split("+")[0];
             let hour = hourT.split(":")[0];
             let minutes = hourT.split(":")[1];
             hour = hour + ":" + minutes;
+            hour = this._timezone.calculeTimezone(timezone, hour);
             busyHours.push(hour)
         })
         this.busyHours = busyHours;

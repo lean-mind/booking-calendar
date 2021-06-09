@@ -42,6 +42,11 @@ export class BookingCalendar {
     calendarContainer: HTMLElement;
 
     /**
+     * Button active cell of days
+     */
+    activeCell: HTMLButtonElement;
+
+    /**
      * @param lang {es | en} Calendar language
      * @param idContainer {string} Container ID where the calendar is going to be displayed
      */
@@ -72,6 +77,7 @@ export class BookingCalendar {
         this.setBookingList();
         this.container.append(this._bookingList.getTimezoneContainer());
         this._bookingList.setCountrySelect();
+        this.selectTimezoneListener();
     }
 
     /**
@@ -158,6 +164,7 @@ export class BookingCalendar {
 
             if (this._calendar.isToday(day)) {
                 cell.classList.add('active');
+                this.activeCell = cell as HTMLButtonElement;
             }
 
             this.daysContainer.appendChild(cell);
@@ -167,6 +174,7 @@ export class BookingCalendar {
 
         if (!this._calendar.isMonthEqualsTodaysMonth()) {
             cells[0].classList.add('active');
+            this.activeCell = cells[0] as HTMLButtonElement;
         }
 
 
@@ -193,9 +201,9 @@ export class BookingCalendar {
         cells.forEach(cell => {
             cell.classList.remove('active');
         });
-        const selectedBtn = (e.target as HTMLButtonElement);
-        selectedBtn.classList.add('active');
-        const day = selectedBtn.innerHTML as string;
+        this.activeCell = (e.target as HTMLButtonElement);
+        this.activeCell.classList.add('active');
+        const day: string = this.activeCell.innerHTML as string;
         this.setBookingList(day)
     }
 
@@ -205,7 +213,9 @@ export class BookingCalendar {
     setBookingList(digit?: string) {
         const today = new Date().getDate() + '';
         let day: Day = { digit: (digit) ? digit : today, hours: config.availableHours };
-        this._calendar.setDay(day.digit)
+        const timezone = this._bookingList.getSelectTimezone();
+
+        this._calendar.setDay(day.digit, timezone)
             .then(result => {
                 day = this._calendar.removeBusyHours(day);
                 console.log(day);
@@ -213,7 +223,28 @@ export class BookingCalendar {
             }).catch(error => {
                 console.log(error);
             })
-
     }
+
+    /**
+     * Create a event when timezone is changed
+     */
+    selectTimezoneListener = () => {
+        const addListener = () => {
+            const day: string = this.activeCell.innerHTML as string;
+            this.setBookingList(day);
+        }
+
+        this._bookingList.selectTimezone.addEventListener('change', () => {
+            addListener();
+        })
+
+        this._bookingList.selectCountry.addEventListener('change', () => {
+            addListener();
+        });
+    }
+
+
+
+    
 
 }

@@ -2,6 +2,7 @@ import { Day } from "../interfaces/Day";
 import { Timezone as TimezoneService } from "../services/Timezone";
 import { BookingModalForm } from "./BookingModalForm";
 import { Country, Timezone } from 'countries-and-timezones';
+import { timingSafeEqual } from "node:crypto";
 
 export class BookingList {
 
@@ -26,9 +27,14 @@ export class BookingList {
     timezoneContainer: HTMLElement;
 
     /**
-     * 
+     * Select Timezone 
      */
     selectTimezone: HTMLSelectElement;
+
+    /**
+     * Select Country
+     */
+    selectCountry: HTMLSelectElement;
 
     constructor() {
         this.hoursContainer = document.createElement("div");
@@ -77,6 +83,7 @@ export class BookingList {
     setCountrySelect() {
         const allCountries = this._timezone.getAllCountries();
         const select = document.createElement("select");
+        select.setAttribute('id', 'countries');
 
         Object.values(allCountries).forEach((country: Country) => {
             let option = document.createElement("option");
@@ -88,31 +95,45 @@ export class BookingList {
 
         select.addEventListener("change", (e: any) => {
             const id: string = e.target.value;
-            this.setTimezones(id)
+            this.setTimezones(id);
         });
         this.setTimezones('ES');
-        this.timezoneContainer.append(select);
+
+        this.selectCountry = select;
+        this.timezoneContainer.append(this.selectCountry);
         this.timezoneContainer.append(this.selectTimezone);
     }
 
-
+    /**
+     * Sets the select element with all the timezones of the country
+     * @param id Country ID
+     */
     setTimezones = (id: string) => {
         const timezones = this._timezone.getTimezoneForCountry(id);
         this.selectTimezone.innerHTML = "";
-        Object.values(timezones).forEach((zone: Timezone) => {
+        Object.values(timezones).forEach((zone: Timezone, index: number) => {
             if (zone.name.split('/')[1] !== undefined) {
                 let option = document.createElement("option");
                 option.value = zone.name;
-                option.innerHTML = '(UTC ' + zone.utcOffsetStr + ') ' + zone.name.split('/')[1].replace('_',' ');
+                option.innerHTML = '(UTC ' + zone.utcOffsetStr + ') ' + zone.name.split('/')[1].replace('_', ' ');
+                option.defaultSelected = (zone.name === "Atlantic/Canary") ? true : false;
                 this.selectTimezone.appendChild(option);
             }
         });
     }
 
+    /**
+     * 
+     * @returns value of selectTimezone
+     */
+    getSelectTimezone() {
+        return this.selectTimezone.value;
+    }
+
 
     /**
      * 
-     * @returns 
+     * @returns timezone container
      */
     getTimezoneContainer(): HTMLElement {
         return this.timezoneContainer;

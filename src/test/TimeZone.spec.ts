@@ -10,10 +10,9 @@ describe('TimeZone service', () => {
         });
 
         describe("calculeTimezone function", () => {
-            test("", () => {
+            test("should return the time changed to the time zone of America/New_York", () => {
                 const timezone = "America/New_York";
                 const hour = "18:00";
-
                 const result = _timezone.calculeTimezone(timezone, hour);
                 const expectedResult = "13:00";
                 expect(result).toEqual(expectedResult);
