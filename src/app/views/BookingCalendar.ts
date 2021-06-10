@@ -147,8 +147,9 @@ export class BookingCalendar {
 
         this._calendar.setMonthStructure().forEach(day => {
             const cell: HTMLElement = document.createElement("div");
-            cell.innerHTML = this._calendar.getDayDigit(day);
-
+            const digitDay = this._calendar.getDayDigit(day);
+            cell.innerHTML = digitDay;
+            cell.setAttribute('id', "day-" + digitDay);
             if (this._calendar.isDayBeforeToday(day)) {
                 cell.classList.add("cell_disabled");
             }
@@ -213,13 +214,24 @@ export class BookingCalendar {
     setBookingList(digit?: string) {
         const today = new Date().getDate() + '';
         let day: Day = { digit: (digit) ? digit : today, hours: config.availableHours };
-        const timezone = this._bookingList.getSelectTimezone();
 
-        this._calendar.setDay(day.digit, timezone)
+        this._calendar.setDay(day.digit)
             .then(result => {
                 day = this._calendar.removeBusyHours(day);
-                console.log(day);
-                this._bookingList.setHours(day);
+                if (day.hours.length == 0) {
+                    const yesterdayCell = this.activeCell;
+                    let yesterdayId = parseInt(yesterdayCell.getAttribute('id').replace("day-", ''));
+                    yesterdayId = yesterdayId + 1;
+                    this.activeCell = document.getElementById("day-" + yesterdayId) as HTMLButtonElement;
+                    yesterdayCell.classList.remove('active');
+                    yesterdayCell.classList.add('cell_disabled');
+                    yesterdayCell.removeEventListener('click', this.selectedDay)
+                    this.activeCell.classList.add('active');
+                    this.setBookingList(yesterdayId + "");
+                } else {
+                    this._bookingList.setHours(day);
+                }
+
             }).catch(error => {
                 console.log(error);
             })
@@ -245,6 +257,6 @@ export class BookingCalendar {
 
 
 
-    
+
 
 }

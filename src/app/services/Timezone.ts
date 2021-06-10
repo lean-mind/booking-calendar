@@ -14,7 +14,7 @@ export class Timezone {
     }
 
     calculeTimezone(timezone: string, hourDate: string) {
-        const resultDate = moment.utc(`2020-06-11 ${hourDate}`).tz("Europe/London");
+        const resultDate = moment.utc(`2020-05-05 ${hourDate}`).tz("Europe/London");
         const result = resultDate.tz(timezone).format("HH:mm");
         return result;
     }
