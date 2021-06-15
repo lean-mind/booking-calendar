@@ -1,8 +1,7 @@
 import { Day } from "../interfaces/Day";
-import { Timezone as TimezoneService } from "../services/Timezone";
+import { TimezoneService } from "../services/TimezoneService";
 import { BookingModalForm } from "./BookingModalForm";
 import { Country, Timezone } from 'countries-and-timezones';
-import { timingSafeEqual } from "node:crypto";
 
 export class BookingList {
 
@@ -67,7 +66,7 @@ export class BookingList {
         day.hours.forEach(hour => {
             let hourBtn = document.createElement("a");
             hourBtn.classList.add('hour');
-            hour = this._timezone.calculeTimezone(timezone, hour)
+            hour = this._timezone.calculateTimezone(timezone, hour)
             hourBtn.innerHTML = hour;
             this.hoursContainer.appendChild(hourBtn);
 
