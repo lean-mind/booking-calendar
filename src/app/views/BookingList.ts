@@ -2,6 +2,7 @@ import { Day } from "../interfaces/Day";
 import { TimezoneService } from "../services/TimezoneService";
 import { BookingModalForm } from "./BookingModalForm";
 import { Country, Timezone } from 'countries-and-timezones';
+import { Language } from "../pipes/Language";
 
 export class BookingList {
 
@@ -35,10 +36,10 @@ export class BookingList {
      */
     selectCountry: HTMLSelectElement;
 
-    constructor() {
+    constructor(lang: Language) {
         this.hoursContainer = document.createElement("div");
         this.hoursContainer.setAttribute('id', 'hours-container');
-        this._form = new BookingModalForm();
+        this._form = new BookingModalForm(lang);
         this._timezone = new TimezoneService();
         this.timezoneContainer = document.createElement("div");
         this.timezoneContainer.setAttribute('id', 'timezone-container');
@@ -71,7 +72,7 @@ export class BookingList {
             this.hoursContainer.appendChild(hourBtn);
 
             hourBtn.addEventListener("click", () =>
-                this._form.showModal()
+                this._form.show()
             );
         });
     }

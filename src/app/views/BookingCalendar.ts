@@ -52,7 +52,7 @@ export class BookingCalendar {
      */
     constructor(lang: Language = 'en', idContainer: string) {
         this._calendar = new Calendar(lang);
-        this._bookingList = new BookingList();
+        this._bookingList = new BookingList(lang);
         this.container = document.getElementById(idContainer);
         this.monthNameContainer = document.createElement("span");
         this.daysContainer = document.createElement("div");
