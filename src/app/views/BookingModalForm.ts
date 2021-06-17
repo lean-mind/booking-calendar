@@ -46,6 +46,11 @@ export class BookingModalForm {
 
     /**
      * 
+     */
+    btnSubmitForm: HTMLInputElement
+
+    /**
+     * 
      * 
      */
     lang: FormModal;
@@ -83,17 +88,18 @@ export class BookingModalForm {
     createContent() {
         const { submit, warning } = this.lang;
         this.form = document.createElement("form");
-        this.name = document.createElement("input");
-        this.name.setAttribute("type", "text"); 
-        this.email = document.createElement("input");
-        this.email.setAttribute("type", "text");
-        this.description = document.createElement("textarea");
-        const btnSubmit = document.createElement("input");
-        btnSubmit.setAttribute("type", "submit");
-        btnSubmit.setAttribute("value", submit);
-        const warningLabel = document.createElement("p").innerHTML = warning;
-        const formElements = [this.name, this.email, this.description];
+
+        const formElementsObject: InputValue[] = [
+            {name: 'name', value: null, type: 'text', element: 'input'},
+            {name: 'email', value: null, type: 'text', element: 'input'},
+            {name: 'description', value: null, type: null, element: 'textarea'},
+            {name: 'btnSubmitForm', value: submit, type: 'submit', element: 'input'}
+        ];
+        const formElements = this.setInputs(formElementsObject);
+        formElements.pop(); // Delete submit button from the array 
         const labelsElements = this.setLabels(['name', 'email', 'description']);
+
+        // const warningLabel = document.createElement("p").innerHTML = warning;
 
         formElements.forEach((element, index) => {
             const div = document.createElement("div");
@@ -102,17 +108,49 @@ export class BookingModalForm {
             this.form.appendChild(div);
         });
 
-        this.form.appendChild(btnSubmit); 
+        this.form.appendChild(this.btnSubmitForm);
         this.formContentContainer.appendChild(this.form);
     }
 
-    setLabels(labels: string[]){
+    /**
+     * 
+     * @param labels 
+     * @returns 
+     */
+    setLabels(labels: string[]) {
         const result: HTMLElement[] = [];
-        labels.forEach(labelName=>{
+        labels.forEach(labelName => {
             const label = document.createElement("label");
             label.innerHTML = (this as any)['lang'][labelName];
             result.push(label);
         });
         return result;
     }
+
+    /**
+     * 
+     * @param inputs 
+     * @returns 
+     */
+    setInputs(inputs: InputValue[]) {
+        const result: HTMLElement[] = [];
+        inputs.forEach(item => {
+            const domElement = document.createElement(item.element);
+            const input = (item.element === "input") 
+            ? domElement as HTMLInputElement 
+            : domElement as HTMLTextAreaElement;
+            (item.element === "input") ? input.setAttribute("type", item.type) : null;
+            (item.type === "submit") ? input.value = item.value : null;
+            (this as any)[item.name] = input;
+            result.push((this as any)[item.name])
+        });
+        return result;
+    }
+}
+
+type InputValue = {
+    name: string,
+    type: string,
+    value: string,
+    element: string
 }
