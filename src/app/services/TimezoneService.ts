@@ -1,4 +1,4 @@
-import * as lib from 'countries-and-timezones';
+import { Timezone, getTimezonesForCountry, getAllCountries } from 'countries-and-timezones';
 import * as moment from 'moment-timezone';
 
 export class TimezoneService {
@@ -6,11 +6,11 @@ export class TimezoneService {
     constructor() { }
 
     getAllCountries() {
-        return lib.getAllCountries();
+        return getAllCountries();
     }
 
-    getTimezoneForCountry(id: string): lib.Timezone[] {
-        return lib.getTimezonesForCountry(id);
+    getTimezoneForCountry(id: string): Timezone[] {
+        return getTimezonesForCountry(id);
     }
 
     calculateTimezone(timezone: string, hourDate: string) {
