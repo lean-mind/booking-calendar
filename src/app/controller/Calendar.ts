@@ -1,9 +1,8 @@
-import { lang as langMonths } from './../lang/months';
-import { lang as langDays } from './../lang/days';
-import { Day } from './../Interfaces/Day';
-import { Language } from '../Pipes/Language';
-import { ApiCalendar } from '../Services/ApiCalendar';
-import { stringify } from 'node:querystring';
+import { lang as langMonths } from '../lang/months';
+import { lang as langDays } from '../lang/days';
+import { Day } from '../interfaces/Day';
+import { Language } from '../pipes/Language';
+import { ApiCalendar } from '../services/ApiCalendar';
 
 export class Calendar {
 
@@ -30,9 +29,10 @@ export class Calendar {
     daysName: string[] = [];
 
     /**
-     * 
+     * Busy hours of the day
      */
     busyHours: string[] = [];
+
 
     /**
      * @param key {string} Google Calendar API KEY
@@ -209,8 +209,8 @@ export class Calendar {
     }
 
     /**
-     * 
-     * @param day 
+     * Call the api and get the busy hour of the calendar
+     * @param day {string} Day of which we are going to get the hours
      */
     setDay(day: string): Promise<boolean> {
         const date: Date = new Date(this.currentDate.getFullYear(),
@@ -228,7 +228,7 @@ export class Calendar {
     }
 
     /**
-     * 
+     * Set the busy hours 
      * @param json 
      */
     setBusyHours(json: any[]): void {
@@ -238,12 +238,18 @@ export class Calendar {
             let hour = hourT.split(":")[0];
             let minutes = hourT.split(":")[1];
             hour = hour + ":" + minutes;
+
             busyHours.push(hour)
         })
         this.busyHours = busyHours;
     }
 
-    foo(day: Day) {
+    /**
+     * Remove busy hours of the days hours
+     * @param day {Day}
+     * @returns the day without the busy hours
+     */
+    removeBusyHours(day: Day) {
         const busyHours: string[] = this.busyHours;
         day.hours = day.hours.filter(function (val: string) {
             return busyHours.indexOf(val) == -1;

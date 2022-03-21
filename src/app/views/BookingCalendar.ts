@@ -1,9 +1,8 @@
-import { Calendar } from '../Controller/Calendar';
+import { Calendar } from '../controller/Calendar';
 import { BookingList } from './BookingList';
-import { Language } from '../Pipes/Language';
-import { Day } from '../Interfaces/Day';
+import { Language } from '../pipes/Language';
+import { Day } from '../interfaces/Day';
 import config from "../config/calendar.config"
-
 
 export class BookingCalendar {
 
@@ -43,12 +42,17 @@ export class BookingCalendar {
     calendarContainer: HTMLElement;
 
     /**
+     * Button active cell of days
+     */
+    activeCell: HTMLButtonElement;
+
+    /**
      * @param lang {es | en} Calendar language
      * @param idContainer {string} Container ID where the calendar is going to be displayed
      */
     constructor(lang: Language = 'en', idContainer: string) {
         this._calendar = new Calendar(lang);
-        this._bookingList = new BookingList();
+        this._bookingList = new BookingList(lang);
         this.container = document.getElementById(idContainer);
         this.monthNameContainer = document.createElement("span");
         this.daysContainer = document.createElement("div");
@@ -69,8 +73,11 @@ export class BookingCalendar {
         this.fillCalendarDaysElement();
         this.container.appendChild(this.calendarContainer)
         this.togglePreviousButton();
-        this.container.appendChild(this._bookingList.getListContainer());
+        this.container.appendChild(this._bookingList.getHoursContainer());
         this.setBookingList();
+        this.container.append(this._bookingList.getTimezoneContainer());
+        this._bookingList.setCountrySelect();
+        this.selectTimezoneListener();
     }
 
     /**
@@ -140,8 +147,9 @@ export class BookingCalendar {
 
         this._calendar.setMonthStructure().forEach(day => {
             const cell: HTMLElement = document.createElement("div");
-            cell.innerHTML = this._calendar.getDayDigit(day);
-
+            const digitDay = this._calendar.getDayDigit(day);
+            cell.innerHTML = digitDay;
+            cell.setAttribute('id', "day-" + digitDay);
             if (this._calendar.isDayBeforeToday(day)) {
                 cell.classList.add("cell_disabled");
             }
@@ -157,6 +165,7 @@ export class BookingCalendar {
 
             if (this._calendar.isToday(day)) {
                 cell.classList.add('active');
+                this.activeCell = cell as HTMLButtonElement;
             }
 
             this.daysContainer.appendChild(cell);
@@ -166,6 +175,7 @@ export class BookingCalendar {
 
         if (!this._calendar.isMonthEqualsTodaysMonth()) {
             cells[0].classList.add('active');
+            this.activeCell = cells[0] as HTMLButtonElement;
         }
 
 
@@ -192,11 +202,9 @@ export class BookingCalendar {
         cells.forEach(cell => {
             cell.classList.remove('active');
         });
-        const selectedBtn = (e.target as HTMLButtonElement);
-        selectedBtn.classList.add('active');
-        const day = selectedBtn.innerHTML as string;
-        // this._calendar.setDay(day);
-        console.log(day);
+        this.activeCell = (e.target as HTMLButtonElement);
+        this.activeCell.classList.add('active');
+        const day: string = this.activeCell.innerHTML as string;
         this.setBookingList(day)
     }
 
@@ -206,15 +214,49 @@ export class BookingCalendar {
     setBookingList(digit?: string) {
         const today = new Date().getDate() + '';
         let day: Day = { digit: (digit) ? digit : today, hours: config.availableHours };
+
         this._calendar.setDay(day.digit)
             .then(result => {
-                day = this._calendar.foo(day);
-                console.log(day);
-                this._bookingList.setHours(day);
+                day = this._calendar.removeBusyHours(day);
+                if (day.hours.length == 0) {
+                    const yesterdayCell = this.activeCell;
+                    let yesterdayId = parseInt(yesterdayCell.getAttribute('id').replace("day-", ''));
+                    yesterdayId = yesterdayId + 1;
+                    this.activeCell = document.getElementById("day-" + yesterdayId) as HTMLButtonElement;
+                    yesterdayCell.classList.remove('active');
+                    yesterdayCell.classList.add('cell_disabled');
+                    yesterdayCell.removeEventListener('click', this.selectedDay)
+                    this.activeCell.classList.add('active');
+                    this.setBookingList(yesterdayId + "");
+                } else {
+                    this._bookingList.setHours(day);
+                }
+
             }).catch(error => {
                 console.log(error);
             })
-
     }
+
+    /**
+     * Create a event when timezone is changed
+     */
+    selectTimezoneListener = () => {
+        const addListener = () => {
+            const day: string = this.activeCell.innerHTML as string;
+            this.setBookingList(day);
+        }
+
+        this._bookingList.selectTimezone.addEventListener('change', () => {
+            addListener();
+        })
+
+        this._bookingList.selectCountry.addEventListener('change', () => {
+            addListener();
+        });
+    }
+
+
+
+
 
 }
