@@ -1,12 +1,12 @@
-import { Timezone } from '../app/services/Timezone';
+import { TimezoneService } from '../app/services/TimezoneService';
 
 describe('TimeZone service', () => {
 
-    let _timezone: Timezone;
+    let _timezone: TimezoneService;
 
     describe('calculeTimezone', () => {
         beforeEach(() => {
-            _timezone = new Timezone();
+            _timezone = new TimezoneService();
         });
 
         describe("calculeTimezone function", () => {

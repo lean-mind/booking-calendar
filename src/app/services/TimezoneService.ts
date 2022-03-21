@@ -14,6 +14,7 @@ export class TimezoneService {
     }
 
     calculateTimezone(timezone: string, hourDate: string) {
+        // TODO: Remove hardcoded date value 
         const resultDate = moment.utc(`2020-05-05 ${hourDate}`).tz("Europe/London");
         const result = resultDate.tz(timezone).format("HH:mm");
         return result;
